@@ -1,97 +1,97 @@
 export default function (widgetName, privateWidget, childrenWidgets, fields) {
-    const name = (privateWidget ? '_' : '') + widgetName;
+  const name = (privateWidget ? '_' : '') + widgetName;
 
-    let widgetConstructorParams = '';
-    for (let widget of childrenWidgets) {
-        if (widget.nullable) {
-            widgetConstructorParams += `\nthis.${widget.name},`;
-        } else {
-            widgetConstructorParams += `\nrequired this.${widget.name},`;
-        }
+  let widgetConstructorParams = '';
+  for (let widget of childrenWidgets) {
+    if (widget.nullable) {
+      widgetConstructorParams += `\nthis.${widget.name},`;
+    } else {
+      widgetConstructorParams += `\nrequired this.${widget.name},`;
     }
-    for (let field of fields) {
-        if (field.type.endsWith('?')) {
-            widgetConstructorParams += `\nthis.${field.name},`;
-        } else {
-            widgetConstructorParams += `\nrequired this.${field.name},`;
-        }
+  }
+  for (let field of fields) {
+    if (field.type.endsWith('?')) {
+      widgetConstructorParams += `\nthis.${field.name},`;
+    } else {
+      widgetConstructorParams += `\nrequired this.${field.name},`;
     }
+  }
 
-    let widgetFields = '';
-    for (let widget of childrenWidgets) {
-        if (widget.nullable) {
-            widgetFields += `    final Widget? ${widget.name};\n`;
-        } else {
-            widgetFields += `    final Widget ${widget.name};\n`;
-        }
+  let widgetFields = '';
+  for (let widget of childrenWidgets) {
+    if (widget.nullable) {
+      widgetFields += `    final Widget? ${widget.name};\n`;
+    } else {
+      widgetFields += `    final Widget ${widget.name};\n`;
     }
-    for (let field of fields) {
-        widgetFields += `    final ${field.type} ${field.name};\n`;
-    }
+  }
+  for (let field of fields) {
+    widgetFields += `    final ${field.type} ${field.name};\n`;
+  }
 
-    let createRenderObjectParams = '';
-    for (let field of fields) {
-        createRenderObjectParams += `        ${field.name}: ${field.name},\n`;
-    }
+  let createRenderObjectParams = '';
+  for (let field of fields) {
+    createRenderObjectParams += `        ${field.name}: ${field.name},\n`;
+  }
 
-    let updateRenderObject = '';
-    if (fields.length > 0) {
-        updateRenderObject += `      @override
+  let updateRenderObject = '';
+  if (fields.length > 0) {
+    updateRenderObject += `      @override
         void updateRenderObject(
             BuildContext context,
             _Render${widgetName} renderObject,
             ) {`;
 
-        if (fields.length === 1) {
-            updateRenderObject += `renderObject.${fields[0].name} = ${fields[0].name};\n`;
-        } else {
-            updateRenderObject += 'renderObject'
-            for (let field of fields) {
-                updateRenderObject += `\n..${field.name} = ${field.name}`;
-            }
-            updateRenderObject += ';\n'
-        }
-
-        updateRenderObject += '}';
+    if (fields.length === 1) {
+      updateRenderObject += `renderObject.${fields[0].name} = ${fields[0].name};\n`;
+    } else {
+      updateRenderObject += 'renderObject'
+      for (let field of fields) {
+        updateRenderObject += `\n..${field.name} = ${field.name}`;
+      }
+      updateRenderObject += ';\n'
     }
 
-    let slots = '';
-    if (childrenWidgets.length > 0) {
-        slots += `enum _${widgetName}Slot { `;
-        for (let widget of childrenWidgets) {
-            slots += `${widget.name}, `;
-        }
-        slots += '}';
-    }
+    updateRenderObject += '}';
+  }
 
-    let elementElementFields = '';
+  let slots = '';
+  if (childrenWidgets.length > 0) {
+    slots += `enum _${widgetName}Slot { `;
     for (let widget of childrenWidgets) {
-        elementElementFields += `Element? ${widget.name}Element;\n`;
+      slots += `${widget.name}, `;
     }
+    slots += '}';
+  }
 
-    let elementChildrenMethods = '';
-    if (childrenWidgets.length > 0) {
-        elementChildrenMethods += `@override
+  let elementElementFields = '';
+  for (let widget of childrenWidgets) {
+    elementElementFields += `Element? ${widget.name}Element;\n`;
+  }
+
+  let elementChildrenMethods = '';
+  if (childrenWidgets.length > 0) {
+    elementChildrenMethods += `@override
         void visitChildren(ElementVisitor visitor) {\n`;
-        for (let widget of childrenWidgets) {
-            elementChildrenMethods += `if (${widget.name} != null) visitor(${widget.name}!);\n`;
-        }
-        elementChildrenMethods += `
+    for (let widget of childrenWidgets) {
+      elementChildrenMethods += `if (${widget.name}Element != null) visitor(${widget.name}Element!);\n`;
+    }
+    elementChildrenMethods += `
     }
   
     @override
     void forgetChild(Element child) {\n`;
 
-        for (let widget of childrenWidgets) {
-            if (childrenWidgets.indexOf(widget) === 0) {
-                elementChildrenMethods += `if (child.slot == _${widgetName}Slot.${widget.name}) {\n`;
-            } else {
-                elementChildrenMethods += `} else if (child.slot == _${widgetName}Slot.${widget.name}) {\n`;
-            }
-            elementChildrenMethods += `${widget.name}Element = null;\n`;
-        }
+    for (let widget of childrenWidgets) {
+      if (childrenWidgets.indexOf(widget) === 0) {
+        elementChildrenMethods += `if (child.slot == _${widgetName}Slot.${widget.name}) {\n`;
+      } else {
+        elementChildrenMethods += `} else if (child.slot == _${widgetName}Slot.${widget.name}) {\n`;
+      }
+      elementChildrenMethods += `${widget.name}Element = null;\n`;
+    }
 
-        elementChildrenMethods += `}
+    elementChildrenMethods += `}
         super.forgetChild(child);
       }
     
@@ -109,15 +109,15 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
     
       void _updateChildren(${name} widget) {\n`;
 
-        for (let widget of childrenWidgets) {
-            elementChildrenMethods += `${widget.name}Element = updateChild(
+    for (let widget of childrenWidgets) {
+      elementChildrenMethods += `${widget.name}Element = updateChild(
                 ${widget.name}Element,
                 widget.${widget.name},
                 _${widgetName}Slot.${widget.name},
               );\n\n`;
-        }
+    }
 
-        elementChildrenMethods += `}
+    elementChildrenMethods += `}
     
         @override
         void insertRenderObjectChild(
@@ -151,39 +151,39 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
           final box = child == null ? null : child as RenderBox;
       `;
 
-        for (let widget of childrenWidgets) {
-            if (childrenWidgets.indexOf(widget) === 0) {
-                elementChildrenMethods += `if (slot == _${widgetName}Slot.${widget.name}) {\n`;
-            } else {
-                elementChildrenMethods += `} else if (slot == _${widgetName}Slot.${widget.name}) {\n`;
-            }
-            elementChildrenMethods += `renderObject.${widget.name} = box;\n`;
-        }
-
-        elementChildrenMethods += '}\n}';
-    }
-
-    let renderObjectConstructor = '';
-    if (fields.length === 0) {
-        renderObjectConstructor = `_Render${widgetName}();`;
-    } else {
-        renderObjectConstructor = `_Render${widgetName}({\n`;
-        for (let field of fields) {
-            renderObjectConstructor += `required ${field.type} ${field.name},\n`
-        }
-        renderObjectConstructor += `}) : \n`;
-        for (let field of fields) {
-            if (fields.indexOf(field) !== 0) {
-                renderObjectConstructor += ', ';
-            }
-            renderObjectConstructor += `_${field.name} = ${field.name}\n`
-        }
-        renderObjectConstructor += ';';
-    }
-
-    let renderBoxBoxes = '';
     for (let widget of childrenWidgets) {
-        renderBoxBoxes += `   
+      if (childrenWidgets.indexOf(widget) === 0) {
+        elementChildrenMethods += `if (slot == _${widgetName}Slot.${widget.name}) {\n`;
+      } else {
+        elementChildrenMethods += `} else if (slot == _${widgetName}Slot.${widget.name}) {\n`;
+      }
+      elementChildrenMethods += `renderObject.${widget.name} = box;\n`;
+    }
+
+    elementChildrenMethods += '}\n}';
+  }
+
+  let renderObjectConstructor = '';
+  if (fields.length === 0) {
+    renderObjectConstructor = `_Render${widgetName}();`;
+  } else {
+    renderObjectConstructor = `_Render${widgetName}({\n`;
+    for (let field of fields) {
+      renderObjectConstructor += `required ${field.type} ${field.name},\n`
+    }
+    renderObjectConstructor += `}) : \n`;
+    for (let field of fields) {
+      if (fields.indexOf(field) !== 0) {
+        renderObjectConstructor += ', ';
+      }
+      renderObjectConstructor += `_${field.name} = ${field.name}\n`
+    }
+    renderObjectConstructor += ';';
+  }
+
+  let renderBoxBoxes = '';
+  for (let widget of childrenWidgets) {
+    renderBoxBoxes += `   
         RenderBox? _${widget.name};
         RenderBox? get ${widget.name} => _${widget.name};
         set ${widget.name}(RenderBox? ${widget.name}) {
@@ -193,11 +193,11 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
           _${widget.name} = ${widget.name};
           markNeedsLayout();
         }\n`;
-    }
+  }
 
-    let renderBoxFields = '';
-    for (let field of fields) {
-        renderBoxFields += `
+  let renderBoxFields = '';
+  for (let field of fields) {
+    renderBoxFields += `
         ${field.type} _${field.name};
         ${field.type} get ${field.name} => _${field.name};
         set ${field.name}(${field.type} ${field.name}) {
@@ -205,21 +205,21 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
           _${field.name} = ${field.name};
           markNeedsLayout();
         }\n`;
+  }
+
+  let renderBoxWidgetStuff = '';
+  if (childrenWidgets.length > 0) {
+    let childrenYield = '';
+    for (let widget of childrenWidgets) {
+      childrenYield += `if (${widget.name} != null) yield ${widget.name}!;\n`;
     }
 
-    let renderBoxWidgetStuff = '';
-    if (childrenWidgets.length > 0) {
-        let childrenYield = '';
-        for (let widget of childrenWidgets) {
-            childrenYield += `if (${widget.name} != null) yield ${widget.name}!;\n`;
-        }
+    let debugDescribe = '';
+    for (let widget of childrenWidgets) {
+      debugDescribe += `if (${widget.name} != null) ${widget.name}!.toDiagnosticsNode(name: '${widget.name}'),\n`;
+    }
 
-        let debugDescribe = '';
-        for (let widget of childrenWidgets) {
-            debugDescribe += `if (${widget.name} != null) ${widget.name}!.toDiagnosticsNode(name: '${widget.name}'),\n`;
-        }
-
-        renderBoxWidgetStuff += `Iterable<RenderBox> get _children sync* {
+    renderBoxWidgetStuff += `Iterable<RenderBox> get _children sync* {
             ${childrenYield}
           }
         
@@ -254,18 +254,18 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
         
           static BoxParentData _boxParentData(RenderBox? box) =>
               box!.parentData! as BoxParentData;`;
-    }
+  }
 
-    let paintInner = '// TODO';
-    if (childrenWidgets.length > 0) {
-        paintInner = `for (final box in _children) {
+  let paintInner = '// TODO';
+  if (childrenWidgets.length > 0) {
+    paintInner = `for (final box in _children) {
             context.paintChild(box, _boxParentData(box).offset + offset);
           }`;
-    }
+  }
 
-    let hitTestChildrenInner = '// TODO';
-    if (childrenWidgets.length > 0) {
-        hitTestChildrenInner = `for (final box in _children) {
+  let hitTestChildrenInner = '// TODO';
+  if (childrenWidgets.length > 0) {
+    hitTestChildrenInner = `for (final box in _children) {
           final isHit = result.addWithPaintOffset(
             offset: _boxParentData(box).offset,
             position: position,
@@ -277,10 +277,10 @@ export default function (widgetName, privateWidget, childrenWidgets, fields) {
             return true;
           }
         }`;
-    }
+  }
 
 
-    return `class ${name} extends RenderObjectWidget {
+  return `class ${name} extends RenderObjectWidget {
       const ${name}({
         Key? key,${widgetConstructorParams}
       }) : super(key: key);

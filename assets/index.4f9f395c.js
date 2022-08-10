@@ -17,7 +17,7 @@ required this.${E.name},`;let o="";for(let E of n)E.nullable?o+=`    final Widge
 `}a+="}"}let u="";if(n.length>0){u+=`enum _${t}Slot { `;for(let E of n)u+=`${E.name}, `;u+="}"}let f="";for(let E of n)f+=`Element? ${E.name}Element;
 `;let g="";if(n.length>0){g+=`@override
         void visitChildren(ElementVisitor visitor) {
-`;for(let E of n)g+=`if (${E.name} != null) visitor(${E.name}!);
+`;for(let E of n)g+=`if (${E.name}Element != null) visitor(${E.name}Element!);
 `;g+=`
     }
   

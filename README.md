@@ -1,6 +1,8 @@
 <h1 align="center">Flutter <code>RenderBox</code> boilerplate generator</h1>
 
-![Screenshot](screenshot.png)
+[Go to the generator][generator]
+
+[![Screenshot](screenshot.png)][generator]
 
 ## Problem
 
@@ -29,3 +31,5 @@ npm run dev
 ## Author
 
 [@Albert221](https://github.com/Albert221)
+
+[generator]: https://leancodepl.github.io/render-box-boilerplate-generator/
